@@ -1,0 +1,28 @@
+server:
+  port: 8081
+urls:
+  service-account-service: http://localhost:8080/account/
+spring:
+  jpa:
+    database: POSTGRESQL
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    jdbc-url: jdbc:postgresql://localhost:5432/scheduler
+    username: postgres
+    password: 111
+  mvc:
+    view:
+      prefix: /views/
+      suffix: .jsp
+  quartz:
+    job-store-type: jdbc
+    overwrite-existing-jobs: true
+    jdbc:
+      initialize-schema: never
+      platform: postgres
+    properties:
+      org.quartz.jobStore.driverDelegateClass: "org.quartz.impl.jdbcjobstore.PostgreSQLDelegate"
+      org.quartz.jobStore.tablePrefix: "quartz.QRTZ_"
