@@ -1,4 +1,4 @@
-package com.artzvrzn.model;
+package com.artzvrzn.model.report;
 
 public enum ReportType {
 

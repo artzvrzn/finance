@@ -1,13 +1,12 @@
-package com.artzvrzn.model;
+package com.artzvrzn.model.report;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
-public class ReportParamByDate implements Params {
+public class ReportParamByDate extends ReportParam {
 
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private List<UUID> accounts;

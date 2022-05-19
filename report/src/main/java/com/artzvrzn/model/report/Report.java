@@ -1,4 +1,4 @@
-package com.artzvrzn.model;
+package com.artzvrzn.model.report;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -17,7 +17,7 @@ public class Report {
     private ReportType type;
     private String description;
 
-    private Params params;
+    private ReportParam params;
 
     public UUID getId() {
         return id;
@@ -67,11 +67,11 @@ public class Report {
         this.description = description;
     }
 
-    public void setParams(Params params) {
+    public void setParams(ReportParam params) {
         this.params = params;
     }
 
-    public Params getParams() {
+    public ReportParam getParams() {
         return this.params;
     }
 }

@@ -1,5 +1,8 @@
 server:
   port: 8083
+urls:
+  account-service: http://localhost:8080/account
+  classifier-service: http://localhost:8082/classifier
 spring:
   jpa:
     database: POSTGRESQL

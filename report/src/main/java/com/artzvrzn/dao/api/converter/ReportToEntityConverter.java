@@ -1,7 +1,7 @@
 package com.artzvrzn.dao.api.converter;
 
 import com.artzvrzn.dao.api.entity.ReportEntity;
-import com.artzvrzn.model.Report;
+import com.artzvrzn.model.report.Report;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
 

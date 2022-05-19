@@ -1,10 +1,8 @@
 package com.artzvrzn.controller;
 
-import com.artzvrzn.model.Report;
-import com.artzvrzn.model.ReportFactory;
-import com.artzvrzn.model.ReportParamBalance;
-import com.artzvrzn.model.ReportType;
-import com.artzvrzn.view.ReportService;
+import com.artzvrzn.model.report.Report;
+import com.artzvrzn.model.report.ReportFactory;
+import com.artzvrzn.model.report.ReportType;
 import com.artzvrzn.view.api.IReportService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;

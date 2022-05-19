@@ -1,16 +1,16 @@
 package com.artzvrzn.dao.api.converter;
 
-import com.artzvrzn.model.Params;
+import com.artzvrzn.model.report.ReportParam;
 import org.springframework.util.SerializationUtils;
 
 import javax.persistence.AttributeConverter;
 import javax.persistence.Converter;
 
 @Converter(autoApply = true)
-public class ParamsAttributeConverter implements AttributeConverter<Params, Byte[]> {
+public class ParamsAttributeConverter implements AttributeConverter<ReportParam, Byte[]> {
 
     @Override
-    public Byte[] convertToDatabaseColumn(Params params) {
+    public Byte[] convertToDatabaseColumn(ReportParam params) {
         byte[] bytes = SerializationUtils.serialize(params);
         if (bytes == null) {
             throw new IllegalStateException("Cannot serialize Param to bytes");
@@ -23,11 +23,11 @@ public class ParamsAttributeConverter implements AttributeConverter<Params, Byte
     }
 
     @Override
-    public Params convertToEntityAttribute(Byte[] byteObjects) {
+    public ReportParam convertToEntityAttribute(Byte[] byteObjects) {
         byte[] bytes = new byte[byteObjects.length];
         for (int i = 0; i < byteObjects.length; i++) {
             bytes[i] = byteObjects[i].byteValue();
         }
-        return (Params) SerializationUtils.deserialize(bytes);
+        return (ReportParam) SerializationUtils.deserialize(bytes);
     }
 }

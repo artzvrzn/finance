@@ -1,26 +1,20 @@
-package com.artzvrzn.model;
+package com.artzvrzn.model.rest;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
-import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
-
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 public class Operation {
 
-    private LocalDateTime date;
+    private long date;
     private String description;
     private UUID category;
     private double value;
     private UUID currency;
 
-    public LocalDateTime getDate() {
+    public long getDate() {
         return date;
     }
 
-    public void setDate(LocalDateTime date) {
+    public void setDate(long date) {
         this.date = date;
     }
 
@@ -46,6 +40,17 @@ public class Operation {
 
     public void setValue(double value) {
         this.value = value;
+    }
+
+    @Override
+    public String toString() {
+        return "Operation{" +
+                "date=" + date +
+                ", description='" + description + '\'' +
+                ", category=" + category +
+                ", value=" + value +
+                ", currency=" + currency +
+                '}';
     }
 
     public UUID getCurrency() {

@@ -1,4 +1,4 @@
-package com.artzvrzn.model;
+package com.artzvrzn.model.report;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -23,7 +23,7 @@ public class ReportFactory {
         return report;
     }
 
-    private Params resolveParams(ReportType type, String json) throws JsonProcessingException {
+    private ReportParam resolveParams(ReportType type, String json) throws JsonProcessingException {
         switch (type) {
             case BALANCE:
                 return mapper.readValue(json, ReportParamBalance.class);

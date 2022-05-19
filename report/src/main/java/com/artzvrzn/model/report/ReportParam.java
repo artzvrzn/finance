@@ -1,12 +1,12 @@
-package com.artzvrzn.model;
+package com.artzvrzn.model.report;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.UUID;
 
-public class ReportParamBalance implements Params {
+public abstract class ReportParam implements Serializable {
 
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private List<UUID> accounts;

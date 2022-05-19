@@ -1,13 +1,11 @@
 package com.artzvrzn.dao.api.entity;
 
-import com.artzvrzn.model.Params;
-import com.artzvrzn.model.ReportType;
-import com.artzvrzn.model.Status;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.artzvrzn.model.report.ReportParam;
+import com.artzvrzn.model.report.ReportType;
+import com.artzvrzn.model.report.Status;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
-import javax.persistence.MappedSuperclass;
 import javax.persistence.Table;
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -24,7 +22,7 @@ public class ReportEntity {
     private ReportType type;
     private String description;
 
-    private Params params;
+    private ReportParam params;
 
     public UUID getId() {
         return id;
@@ -74,11 +72,11 @@ public class ReportEntity {
         this.description = description;
     }
 
-    public Params getParams() {
+    public ReportParam getParams() {
         return params;
     }
 
-    public void setParams(Params params) {
+    public void setParams(ReportParam params) {
         this.params = params;
     }
 }
