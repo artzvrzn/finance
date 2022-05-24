@@ -1,4 +1,4 @@
-package com.artzvrzn.model.rest;
+package com.artzvrzn.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -38,12 +38,4 @@ public class Account {
         this.currency = currency;
     }
 
-    @Override
-    public String toString() {
-        return "Account{" +
-                "id=" + id +
-                ", balance=" + balance +
-                ", currency=" + currency +
-                '}';
-    }
 }

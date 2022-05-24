@@ -1,13 +1,11 @@
 package com.artzvrzn.dao.api.entity;
 
-import com.artzvrzn.model.report.ReportParam;
-import com.artzvrzn.model.report.ReportType;
-import com.artzvrzn.model.report.Status;
+import com.artzvrzn.model.ReportType;
+import com.artzvrzn.model.Status;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.Map;
 import java.util.UUID;
 
 @Entity
@@ -21,8 +19,10 @@ public class ReportEntity {
     private Status status;
     private ReportType type;
     private String description;
-
-    private ReportParam params;
+    @OneToOne(mappedBy = "report", cascade = CascadeType.ALL)
+    @PrimaryKeyJoinColumn
+    private FilenameEntity filename;
+    private Map<String, Object> params;
 
     public UUID getId() {
         return id;
@@ -72,11 +72,19 @@ public class ReportEntity {
         this.description = description;
     }
 
-    public ReportParam getParams() {
+    public FilenameEntity getFilename() {
+        return filename;
+    }
+
+    public void setFilename(FilenameEntity filename) {
+        this.filename = filename;
+    }
+
+    public Map<String, Object> getParams() {
         return params;
     }
 
-    public void setParams(ReportParam params) {
+    public void setParams(Map<String, Object> params) {
         this.params = params;
     }
 }

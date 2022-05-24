@@ -49,8 +49,6 @@ public class OperationService implements IOperationService {
         if (!accountEntity.getCurrency().equals(operationEntity.getCurrency())) {
             throw new ValidationException("This operation is forbidden for this account due to another currency type");
         }
-//        double newSum = accountEntity.getBalance().getValue() + operation.getValue();
-//        accountEntity.getBalance().setValue(newSum);
         operationEntity.setAccount(accountEntity);
         operationRepository.save(operationEntity);
     }
@@ -60,6 +58,22 @@ public class OperationService implements IOperationService {
     public Page<Operation> get(UUID accountId, Pageable pageable) {
         return operationRepository
                 .findAllByAccount_Id(accountId, pageable)
+                .map(e -> conversionService.convert(e, Operation.class));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<Operation> get(UUID accountId, long from, long to, Pageable pageable) {
+        return operationRepository
+                .findAllByAccount_IdAndDateBetween(accountId, from, to, pageable)
+                .map(e -> conversionService.convert(e, Operation.class));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<Operation> get(UUID accountId, UUID categoryId, Pageable pageable) {
+        return operationRepository
+                .findAllByAccount_IdAndCategory(accountId, categoryId, pageable)
                 .map(e -> conversionService.convert(e, Operation.class));
     }
 

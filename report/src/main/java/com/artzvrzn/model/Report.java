@@ -1,8 +1,10 @@
-package com.artzvrzn.model.report;
+package com.artzvrzn.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 import java.util.UUID;
 
 public class Report {
@@ -16,8 +18,9 @@ public class Report {
     private Status status;
     private ReportType type;
     private String description;
-
-    private ReportParam params;
+    @JsonIgnore
+    private String filename;
+    private Map<String, Object> params;
 
     public UUID getId() {
         return id;
@@ -67,11 +70,19 @@ public class Report {
         this.description = description;
     }
 
-    public void setParams(ReportParam params) {
-        this.params = params;
+    public String getFilename() {
+        return filename;
     }
 
-    public ReportParam getParams() {
-        return this.params;
+    public void setFilename(String filename) {
+        this.filename = filename;
+    }
+
+    public Map<String, Object> getParams() {
+        return params;
+    }
+
+    public void setParams(Map<String, Object> params) {
+        this.params = params;
     }
 }

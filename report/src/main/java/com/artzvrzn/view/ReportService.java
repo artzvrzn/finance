@@ -1,9 +1,11 @@
 package com.artzvrzn.view;
 
-import com.artzvrzn.dao.api.ReportRepository;
+import com.artzvrzn.dao.api.IReportRepository;
 import com.artzvrzn.dao.api.entity.ReportEntity;
-import com.artzvrzn.model.report.Report;
-import com.artzvrzn.model.report.Status;
+import com.artzvrzn.model.Report;
+import com.artzvrzn.model.ReportType;
+import com.artzvrzn.model.Status;
+import com.artzvrzn.view.api.IReportExecutor;
 import com.artzvrzn.view.api.IReportService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.ConversionService;
@@ -12,44 +14,46 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.Optional;
+import java.util.Map;
 import java.util.UUID;
 
 @Service
 public class ReportService implements IReportService {
 
     @Autowired
-    private ReportRepository reportRepository;
+    private IReportExecutor executor;
     @Autowired
-    private BalanceReportProducer reportGenerator;
+    private IReportRepository reportRepository;
     @Autowired
     private ConversionService conversionService;
 
     @Override
-    public void create(Report report) {
-        if (report == null) {
-            throw new IllegalArgumentException("Report is null");
-        }
+    public void create(ReportType type, Map<String, Object> params) {
+        Report report = new Report();
         report.setId(UUID.randomUUID());
-        LocalDateTime current = LocalDateTime.now();
-        report.setCreated(current);
-        report.setUpdated(current);
+        LocalDateTime currentTime = LocalDateTime.now();
+        report.setCreated(currentTime);
+        report.setUpdated(currentTime);
         report.setStatus(Status.LOADED);
+        report.setParams(params);
+        report.setType(type);
         ReportEntity entity = conversionService.convert(report, ReportEntity.class);
         reportRepository.save(entity);
-    }
-
-    @Override
-    public Report get(UUID id) {
-        Optional<ReportEntity> optional = reportRepository.findById(id);
-        if (optional.isEmpty()) {
-            throw new IllegalArgumentException(String.format("Report with id %s not found ", id));
-        }
-        return conversionService.convert(optional.get(), Report.class);
+        executor.execute(entity.getId());
     }
 
     @Override
     public Page<Report> get(Pageable pageable) {
         return reportRepository.findAll(pageable).map(e -> conversionService.convert(e, Report.class));
+    }
+
+    @Override
+    public boolean isReady(UUID id) {
+        return executor.isReady(id);
+    }
+
+    @Override
+    public byte[] export(UUID id) {
+        return executor.getFile(id);
     }
 }

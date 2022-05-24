@@ -3,12 +3,14 @@ server:
 urls:
   account-service: http://localhost:8080/account
   classifier-service: http://localhost:8082/classifier
+executor-thread-pool: 5
+reports-storage-path: C:\projects\Finance
 spring:
   jpa:
     database: POSTGRESQL
     show-sql: true
     hibernate:
-      ddl-auto: update
+      ddl-auto: create
   datasource:
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://localhost:5432/report

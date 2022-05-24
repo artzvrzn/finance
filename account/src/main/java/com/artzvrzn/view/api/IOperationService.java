@@ -13,6 +13,10 @@ public interface IOperationService {
 
     Page<Operation> get(UUID accountId, Pageable pageable);
 
+    Page<Operation> get(UUID accountId, long from, long to, Pageable pageable);
+
+    Page<Operation> get(UUID accountId, UUID categoryId, Pageable pageable);
+
     void update(UUID accountId, UUID operationId, long updated, Operation dto);
 
     void delete(UUID accountId, UUID operationId, long updated);

@@ -1,4 +1,4 @@
-package com.artzvrzn.model.rest;
+package com.artzvrzn.model;
 
 import java.util.UUID;
 

@@ -1,4 +1,4 @@
-package com.artzvrzn.model.rest;
+package com.artzvrzn.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;

@@ -1,7 +1,7 @@
-package com.artzvrzn.dao.api.converter;
+package com.artzvrzn.converter;
 
 import com.artzvrzn.dao.api.entity.ReportEntity;
-import com.artzvrzn.model.report.Report;
+import com.artzvrzn.model.Report;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
 
@@ -17,6 +17,7 @@ public class ReportEntityToDtoConverter implements Converter<ReportEntity, Repor
         dto.setType(entity.getType());
         dto.setStatus(entity.getStatus());
         dto.setDescription(entity.getDescription());
+        dto.setFilename(entity.getFilename().getPath());
         dto.setParams(entity.getParams());
         return dto;
     }

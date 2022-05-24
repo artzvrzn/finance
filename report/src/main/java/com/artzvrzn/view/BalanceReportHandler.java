@@ -1,46 +1,62 @@
 package com.artzvrzn.view;
 
-import com.artzvrzn.view.api.ExcelReportProducer;
-import com.artzvrzn.model.rest.Account;
-import com.artzvrzn.model.report.Report;
-import com.artzvrzn.model.report.ReportType;
-import com.artzvrzn.view.api.IRestService;
+import com.artzvrzn.exception.ValidationException;
+import com.artzvrzn.model.Account;
+import com.artzvrzn.view.api.IReportHandler;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 @Component
-public class BalanceReportProducer implements ExcelReportProducer {
+public class BalanceReportHandler implements IReportHandler {
 
-    private final IRestService restService;
-
-    public BalanceReportProducer(IRestService restService) {
-        this.restService = restService;
-    }
+    private static final String ACCOUNT_KEY = "accounts";
+    @Autowired
+    private Communicator communicator;
+    @Autowired
+    private ObjectMapper mapper;
 
     @Override
-    public byte[] produce(Report report) {
-        if (!report.getType().equals(ReportType.BALANCE)) {
-            throw new IllegalStateException("Wrong params type");
-        }
-        List<Account> accounts = restService.getAccounts(report.getParams());
+    public byte[] handle(Map<String, Object> params) {
+        List<Account> accounts = communicator.getAccounts(getIds(params));
         try (Workbook workbook = getWorkbook(accounts);
              ByteArrayOutputStream os = new ByteArrayOutputStream()) {
             workbook.write(os);
             return os.toByteArray();
         } catch (IOException e) {
-            throw new IllegalStateException("Failed to convert report to bytes", e);
+            throw new IllegalStateException("Failed to create report", e);
+        }
+    }
+
+    private List<UUID> getIds(Map<String, Object> params) {
+        validateParams(params);
+        return mapper.convertValue(
+                params.get(ACCOUNT_KEY), mapper.getTypeFactory().constructCollectionType(List.class, UUID.class));
+    }
+
+    private void validateParams(Map<String, Object> params) {
+        if (params == null || params.isEmpty()) {
+            throw new ValidationException("Empty params");
+        }
+        if (params.containsKey(ACCOUNT_KEY)) {
+            if (params.size() > 1) {
+                throw new ValidationException("Wrong parameters for that type of report");
+            }
         }
     }
 
     private Workbook getWorkbook(List<Account> accounts) {
         Workbook workbook = new XSSFWorkbook();
-        Sheet sheet = workbook.createSheet("Persons");
+        Sheet sheet = workbook.createSheet("BALANCE");
         sheet.setColumnWidth(0, 10000);
         sheet.setColumnWidth(1, 10000);
         sheet.setColumnWidth(2, 4000);
@@ -58,7 +74,6 @@ public class BalanceReportProducer implements ExcelReportProducer {
         CellStyle headerStyle = workbook.createCellStyle();
         headerStyle.setFillForegroundColor(IndexedColors.LIGHT_BLUE.getIndex());
         headerStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
-
         XSSFFont font = ((XSSFWorkbook) workbook).createFont();
         font.setFontName("Arial");
         font.setFontHeightInPoints((short) 16);
@@ -95,7 +110,7 @@ public class BalanceReportProducer implements ExcelReportProducer {
         cell.setCellStyle(contentStyle);
 
         cell = row.createCell(1);
-        cell.setCellValue(account.getCurrency().toString());
+        cell.setCellValue(communicator.readCurrency(account.getCurrency()).getTitle());
         cell.setCellStyle(contentStyle);
 
         cell = row.createCell(2);

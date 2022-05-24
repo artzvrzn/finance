@@ -16,4 +16,8 @@ public interface IOperationRepository extends JpaRepository<OperationEntity, UUI
 
     Optional<OperationEntity> findByAccount_IdAndId(UUID accountId, UUID id);
 
+    Page<OperationEntity> findAllByAccount_IdAndDateBetween(
+            UUID accountId, long from, long to, Pageable pageable);
+
+    Page<OperationEntity> findAllByAccount_IdAndCategory(UUID accountId, UUID categoryId, Pageable pageable);
 }
