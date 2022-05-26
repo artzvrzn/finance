@@ -4,6 +4,7 @@ import com.artzvrzn.model.Operation;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.util.Collection;
 import java.util.UUID;
 
 
@@ -13,7 +14,7 @@ public interface IOperationService {
 
     Page<Operation> get(UUID accountId, Pageable pageable);
 
-    Page<Operation> get(UUID accountId, long from, long to, Pageable pageable);
+    Page<Operation> get(UUID accountId, long from, long to, Collection<UUID> categories, Pageable pageable);
 
     Page<Operation> get(UUID accountId, UUID categoryId, Pageable pageable);
 

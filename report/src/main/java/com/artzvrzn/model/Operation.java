@@ -1,20 +1,26 @@
 package com.artzvrzn.model;
 
+import com.artzvrzn.serializer.LongToLocalDateTimeDeserializer;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 public class Operation {
 
-    private long date;
+    @JsonDeserialize(using = LongToLocalDateTimeDeserializer.class)
+    private LocalDateTime date;
     private String description;
     private UUID category;
     private double value;
     private UUID currency;
 
-    public long getDate() {
+    public LocalDateTime getDate() {
         return date;
     }
 
-    public void setDate(long date) {
+    public void setDate(LocalDateTime date) {
         this.date = date;
     }
 

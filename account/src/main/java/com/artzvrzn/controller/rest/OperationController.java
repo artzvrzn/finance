@@ -10,9 +10,11 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/account/{uuid}/operation")
@@ -32,23 +34,17 @@ public class OperationController {
         return operationService.get(uuid, request);
     }
 
-    @RequestMapping(value = "/by_date", method = RequestMethod.GET)
-    public Page<Operation> getOperationsByDate(@PathVariable("uuid") UUID uuid,
-                                               @RequestParam("page") int page,
-                                               @RequestParam("size") int size,
-                                               @RequestParam("from") long from,
-                                               @RequestParam("to") long to) {
-        PageRequest request = PageRequest.of(page, size, Sort.by("date").descending());
-        return operationService.get(uuid, from, to, request);
-    }
 
-    @RequestMapping(value = "/by_category", method = RequestMethod.GET)
+
+    @RequestMapping(value = "/backend/report", method = RequestMethod.GET)
     public Page<Operation> getOperationsByCategory(@PathVariable("uuid") UUID uuid,
                                                    @RequestParam("page") int page,
                                                    @RequestParam("size") int size,
-                                                   @RequestParam("cat") UUID category) {
+                                                   @RequestParam("from") long from,
+                                                   @RequestParam("to") long to,
+                                                   @RequestParam("cat") UUID[] categories) {
         PageRequest request = PageRequest.of(page, size, Sort.by("date").descending());
-        return operationService.get(uuid, category, request);
+        return operationService.get(uuid, from, to, Arrays.stream(categories).collect(Collectors.toList()), request);
     }
 
     @RequestMapping(value = {"", "/"}, method = RequestMethod.POST)

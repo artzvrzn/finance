@@ -8,6 +8,7 @@ import com.artzvrzn.view.api.IReportExecutor;
 import com.artzvrzn.view.api.IReportHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,6 +17,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -26,6 +28,7 @@ public class ReportExecutor implements IReportExecutor {
 
     private final ExecutorService executorService;
     private final HashMap<UUID, Future<?>> futures;
+    private final List<Callable<Boolean>> tasks = new ArrayList<>();
     private final ReportHandlerFactory reportHandlerFactory;
     @Autowired
     private IReportRepository reportRepository;
@@ -47,8 +50,7 @@ public class ReportExecutor implements IReportExecutor {
         ReportEntity entity = reportRepository.getById(id);
         IReportHandler handler = reportHandlerFactory.getGenerator(entity.getType());
         reportRepository.updateStatus(id, Status.PROGRESS, LocalDateTime.now());
-        executorService.execute(() -> writeAsFile(id, handler.handle(entity.getParams())));
-//        futures.put(id, f);
+        executorService.submit(() -> handler.handle(entity.getParams()));
     }
 
     @Override
@@ -70,11 +72,10 @@ public class ReportExecutor implements IReportExecutor {
         Path path = Path.of(storagePath, id.toString() + ".xlsx");
         try {
             Files.write(path, bytes);
-            ReportEntity entity = reportRepository.getById(id);
             reportRepository.updateStatus(id, Status.DONE, LocalDateTime.now());
             filenameRepository.updateFilename(id, path.toString());
         } catch (IOException e) {
-            throw new IllegalStateException(e);
+            throw new IllegalStateException("Cannot write file", e);
         }
     }
 }

@@ -8,6 +8,7 @@ import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import java.io.ByteArrayOutputStream;
@@ -17,6 +18,7 @@ import java.util.Map;
 import java.util.UUID;
 
 @Component
+@Scope("prototype")
 public class BalanceReportHandler implements IReportHandler {
 
     private static final String ACCOUNT_KEY = "accounts";
@@ -56,7 +58,7 @@ public class BalanceReportHandler implements IReportHandler {
 
     private Workbook getWorkbook(List<Account> accounts) {
         Workbook workbook = new XSSFWorkbook();
-        Sheet sheet = workbook.createSheet("BALANCE");
+        Sheet sheet = workbook.createSheet("Balance");
         sheet.setColumnWidth(0, 10000);
         sheet.setColumnWidth(1, 10000);
         sheet.setColumnWidth(2, 4000);

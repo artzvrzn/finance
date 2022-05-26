@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("account/{uuid}/report")
+@RequestMapping("account/{uuid}/export")
 public class ExportController {
 
     @Autowired

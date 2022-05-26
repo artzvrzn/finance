@@ -5,7 +5,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 @SpringBootApplication
-@EnableJpaRepositories(basePackages = "com.artzvrzn.newdao.api")
+@EnableJpaRepositories(basePackages = "com.artzvrzn.dao.api")
 public class ReportApplication {
     public static void main(String[] args) {
         SpringApplication.run(ReportApplication.class, args);

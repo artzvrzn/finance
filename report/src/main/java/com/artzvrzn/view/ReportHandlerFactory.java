@@ -17,9 +17,9 @@ public class ReportHandlerFactory {
             case BALANCE:
                 return context.getBean(BalanceReportHandler.class);
             case BY_DATE:
-                return null;
+                return context.getBean(ByDateReportHandler.class);
             case BY_CATEGORY:
-                return null;
+                return context.getBean(ByCategoryReportHandler.class);
             default:
                 throw new IllegalStateException(String.format("Cannot get generator of type %s", type));
         }
