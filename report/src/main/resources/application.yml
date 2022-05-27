@@ -3,7 +3,6 @@ server:
 urls:
   account-service: http://localhost:8080/account
   classifier-service: http://localhost:8082/classifier
-executor-thread-pool: 5
 reports-storage-path: C:\projects\Finance
 spring:
   jpa:

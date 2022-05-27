@@ -22,5 +22,8 @@ public interface IReportRepository extends JpaRepository<ReportEntity, UUID> {
             "where id = :id", nativeQuery = true)
     void updateStatus(@Param("id") UUID id, @Param("status") Status status, @Param("dt_update") LocalDateTime update);
 
+    @Transactional
+    @Query(value = "select * from app.reports where id = :id and status = :#{#status?.ordinal()}", nativeQuery = true)
+    ReportEntity findByIdIfStatus(@Param("id") UUID id, @Param("status") Status status);
 
 }

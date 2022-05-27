@@ -1,16 +1,17 @@
-package com.artzvrzn.view;
+package com.artzvrzn.view.handler;
 
 import com.artzvrzn.model.*;
 import com.artzvrzn.model.Currency;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriBuilder;
-import org.springframework.web.util.UriBuilderFactory;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import java.net.URI;
 import java.util.*;
 
 @Component
@@ -42,18 +43,16 @@ public class Communicator {
                 .queryParam("from", from)
                 .queryParam("to", to)
                 .queryParam("cat", categories);
-        List<Operation> operations = new LinkedList<>();
-        OperationsPage page = restTemplate.getForObject(uriBuilder.build().toString(), OperationsPage.class);
+        OperationsPage page = getRequest(uriBuilder.build().toString(), OperationsPage.class);
         if (page == null) {
             return Collections.emptyList();
         }
-        System.out.println(page.getTotalPages());
-        operations.addAll(page.getContent());
+        List<Operation> operations = new LinkedList<>(page.getContent());
         int totalPages = page.getTotalPages();
         if (totalPages > 0) {
             for (int i = 1; i < totalPages; i++) {
                 uriBuilder.replaceQueryParam("page", i);
-                page = restTemplate.getForObject(uriBuilder.build().toString(), OperationsPage.class);
+                page = getRequest(uriBuilder.build().toString(), OperationsPage.class);
                 operations.addAll(page.getContent());
             }
         }
@@ -62,16 +61,24 @@ public class Communicator {
 
     public Account getAccount(UUID accountId) {
         String accountUrl = ACCOUNT_SERVICE_URL + "/" + accountId;
-        return restTemplate.getForObject(accountUrl, Account.class);
+        return getRequest(accountUrl, Account.class);
     }
 
     public Currency readCurrency(UUID currencyId) {
         String currencyUrl = CLASSIFIER_SERVICE_URL + "/currency/" + currencyId;
-        return restTemplate.getForObject(currencyUrl, Currency.class);
+        return getRequest(currencyUrl, Currency.class);
     }
 
     public Category readCategory(UUID categoryId) {
-        String currencyUrl = CLASSIFIER_SERVICE_URL + "/operation/category/" + categoryId;
-        return restTemplate.getForObject(currencyUrl, Category.class);
+        String categoryUrl = CLASSIFIER_SERVICE_URL + "/operation/category/" + categoryId;
+        return getRequest(categoryUrl, Category.class);
+    }
+
+    private <T> T getRequest(String url, Class<T> modelClass) {
+        try {
+            return restTemplate.getForObject(url, modelClass);
+        } catch (HttpStatusCodeException e) {
+            return null;
+        }
     }
 }

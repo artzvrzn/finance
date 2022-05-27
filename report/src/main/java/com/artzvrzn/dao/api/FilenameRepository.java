@@ -17,4 +17,7 @@ public interface FilenameRepository extends JpaRepository<FilenameEntity, UUID> 
     @Modifying
     @Query(value = "update app.reports_path set path = :filename where report_id = :id", nativeQuery = true)
     void updateFilename(@Param("id") UUID id, @Param("filename") String filename);
+
+    @Query(value = "select * from app.reports_path where report_id = :id", nativeQuery = true)
+    FilenameEntity getByReportId(@Param("id") UUID id);
 }

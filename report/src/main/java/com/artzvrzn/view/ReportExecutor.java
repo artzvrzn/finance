@@ -5,10 +5,10 @@ import com.artzvrzn.dao.api.IReportRepository;
 import com.artzvrzn.dao.api.entity.ReportEntity;
 import com.artzvrzn.model.Status;
 import com.artzvrzn.view.api.IReportExecutor;
-import com.artzvrzn.view.api.IReportHandler;
+import com.artzvrzn.view.handler.ReportHandlerFactory;
+import com.artzvrzn.view.handler.api.IReportHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,65 +17,48 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.concurrent.*;
 
 @Service
 @Transactional(rollbackFor = Exception.class)
 public class ReportExecutor implements IReportExecutor {
 
-    private final ExecutorService executorService;
-    private final HashMap<UUID, Future<?>> futures;
-    private final List<Callable<Boolean>> tasks = new ArrayList<>();
-    private final ReportHandlerFactory reportHandlerFactory;
+    @Autowired
+    private ReportHandlerFactory reportHandlerFactory;
     @Autowired
     private IReportRepository reportRepository;
     @Autowired
     private FilenameRepository filenameRepository;
-    @Value("${executor-thread-pool}")
-    private int threadCount;
+    @Autowired
+    private ExecutorService executorService;
     @Value("${reports-storage-path}")
     private String storagePath;
-
-    public ReportExecutor(ReportHandlerFactory factory) {
-        this.reportHandlerFactory = factory;
-        this.executorService = Executors.newFixedThreadPool(5);
-        this.futures = new HashMap<>();
-    }
 
     @Override
     public void execute(UUID id) {
         ReportEntity entity = reportRepository.getById(id);
         IReportHandler handler = reportHandlerFactory.getGenerator(entity.getType());
-        reportRepository.updateStatus(id, Status.PROGRESS, LocalDateTime.now());
-        executorService.submit(() -> handler.handle(entity.getParams()));
+        handler.validate(entity.getParams());
+        executorService.execute(() -> {
+            reportRepository.updateStatus(id, Status.PROGRESS, LocalDateTime.now());
+            try {
+                byte[] bytes = handler.generate(entity.getParams());
+                saveFile(id, bytes);
+            } catch (Exception exc) {
+                reportRepository.updateStatus(id, Status.ERROR, LocalDateTime.now());
+            }
+        });
     }
 
-    @Override
-    public boolean isReady(UUID id) {
-        return reportRepository.getById(id).getStatus().equals(Status.DONE);
-    }
-
-    @Override
-    public byte[] getFile(UUID id) {
-        Path filename = Path.of(filenameRepository.getById(id).getPath());
-        try {
-            return Files.readAllBytes(filename);
-        } catch (IOException e) {
-            throw new IllegalStateException("Cannot read file", e);
-        }
-    }
-
-    private void writeAsFile(UUID id, byte[] bytes) {
+    private void saveFile(UUID id, byte[] bytes) {
         Path path = Path.of(storagePath, id.toString() + ".xlsx");
         try {
             Files.write(path, bytes);
             reportRepository.updateStatus(id, Status.DONE, LocalDateTime.now());
             filenameRepository.updateFilename(id, path.toString());
         } catch (IOException e) {
-            throw new IllegalStateException("Cannot write file", e);
+            reportRepository.updateStatus(id, Status.ERROR, LocalDateTime.now());
+            throw new IllegalStateException("Failure during saving report file", e);
         }
     }
 }

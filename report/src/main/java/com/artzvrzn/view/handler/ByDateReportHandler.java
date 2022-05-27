@@ -1,37 +1,39 @@
-package com.artzvrzn.view;
+package com.artzvrzn.view.handler;
 
 import com.artzvrzn.exception.ValidationException;
 import com.artzvrzn.model.Account;
 import com.artzvrzn.model.Operation;
-import com.artzvrzn.view.api.IReportHandler;
+import com.artzvrzn.view.handler.api.IReportHandler;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Component;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
-@Component
-@Scope("prototype")
-public class ByCategoryReportHandler implements IReportHandler {
+//@Component
+//@Scope(proxyMode = ScopedProxyMode.TARGET_CLASS)
+public class ByDateReportHandler implements IReportHandler {
 
     private final Map<UUID, String> readCurrencies = new HashMap<>();
     private final Map<UUID, String> readCategories = new HashMap<>();
-    @Autowired
-    private Communicator communicator;
-    @Autowired
-    private ObjectMapper mapper;
+//    @Autowired
+    private final Communicator communicator;
+//    @Autowired
+    private final ObjectMapper mapper;
+
+    public ByDateReportHandler(Communicator communicator, ObjectMapper mapper) {
+        this.mapper = mapper;
+        this.communicator = communicator;
+    }
 
     @Override
-    public byte[] handle(Map<String, Object> params) {
+    public byte[] generate(Map<String, Object> params) {
         validateParams(params);
         List<Account> accounts = communicator.getAccounts(getAccountIds(params));
         try (Workbook workbook = getWorkbook(accounts, getFrom(params), getTo(params), getCategoryIds(params));
@@ -41,6 +43,11 @@ public class ByCategoryReportHandler implements IReportHandler {
         } catch (IOException e) {
             throw new IllegalStateException("Failed to create report", e);
         }
+    }
+
+    @Override
+    public void validate(Map<String, Object> params) {
+
     }
 
     private List<UUID> getIds(Map<String, Object> params, String key) {
@@ -79,7 +86,7 @@ public class ByCategoryReportHandler implements IReportHandler {
 
     private Workbook getWorkbook(List<Account> accounts, long from, long to, Collection<UUID> categories) {
         Workbook workbook = new XSSFWorkbook();
-        Sheet sheet = workbook.createSheet("By category");
+        Sheet sheet = workbook.createSheet("By date");
         sheet.setColumnWidth(0, 4000);
         sheet.setColumnWidth(1, 10000);
         sheet.setColumnWidth(2, 4000);
@@ -92,7 +99,7 @@ public class ByCategoryReportHandler implements IReportHandler {
         for (Account account: accounts) {
             List<Operation> operations = communicator.getOperations(account.getId(), from, to, categories)
                     .stream()
-                    .sorted(Comparator.comparing(Operation::getCategory))
+                    .sorted(Comparator.comparing(Operation::getDate))
                     .collect(Collectors.toList());
             for (Operation operation: operations) {
                 createRow(account, operation, rowIndex++, sheet, contentStyle);
@@ -122,7 +129,7 @@ public class ByCategoryReportHandler implements IReportHandler {
         Row header = sheet.createRow(0);
 
         Cell headerCell = header.createCell(0);
-        headerCell.setCellValue("Категория");
+        headerCell.setCellValue("Дата");
         headerCell.setCellStyle(headerStyle);
 
         headerCell = header.createCell(1);
@@ -138,19 +145,14 @@ public class ByCategoryReportHandler implements IReportHandler {
         headerCell.setCellStyle(headerStyle);
 
         headerCell = header.createCell(4);
-        headerCell.setCellValue("Дата");
+        headerCell.setCellValue("Категория");
         headerCell.setCellStyle(headerStyle);
     }
 
     private void createRow(Account account, Operation operation, int index, Sheet sheet, CellStyle contentStyle) {
         Row row = sheet.createRow(index);
         Cell cell = row.createCell(0);
-        String category = readCategories.get(operation.getCategory());
-        if (category == null) {
-            category = communicator.readCategory(operation.getCategory()).getTitle();
-            readCategories.put(operation.getCategory(), category);
-        }
-        cell.setCellValue(category);
+        cell.setCellValue(operation.getDate().toLocalDate().format(DateTimeFormatter.ofPattern("dd.MM.yyyy")));
         cell.setCellStyle(contentStyle);
 
         cell = row.createCell(1);
@@ -171,7 +173,12 @@ public class ByCategoryReportHandler implements IReportHandler {
         cell.setCellStyle(contentStyle);
 
         cell = row.createCell(4);
-        cell.setCellValue(operation.getDate().toLocalDate().format(DateTimeFormatter.ofPattern("dd.MM.yyyy")));
+        String category = readCategories.get(operation.getCategory());
+        if (category == null) {
+            category = communicator.readCategory(operation.getCategory()).getTitle();
+            readCategories.put(operation.getCategory(), category);
+        }
+        cell.setCellValue(category);
         cell.setCellStyle(contentStyle);
     }
 }

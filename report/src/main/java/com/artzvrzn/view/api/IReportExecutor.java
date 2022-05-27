@@ -6,8 +6,4 @@ public interface IReportExecutor {
 
     void execute(UUID id);
 
-    boolean isReady(UUID id);
-
-    byte[] getFile(UUID id);
-
 }

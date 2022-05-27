@@ -1,34 +1,37 @@
-package com.artzvrzn.view;
+package com.artzvrzn.view.handler;
 
 import com.artzvrzn.exception.ValidationException;
 import com.artzvrzn.model.Account;
-import com.artzvrzn.view.api.IReportHandler;
+import com.artzvrzn.model.validation.ValidationError;
+import com.artzvrzn.view.handler.api.IReportHandler;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Component;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
-@Component
-@Scope("prototype")
+//@Component
+//@Scope(proxyMode = ScopedProxyMode.TARGET_CLASS)
 public class BalanceReportHandler implements IReportHandler {
 
     private static final String ACCOUNT_KEY = "accounts";
-    @Autowired
-    private Communicator communicator;
-    @Autowired
-    private ObjectMapper mapper;
+    private final Communicator communicator;
+    private final ObjectMapper mapper;
+
+    public BalanceReportHandler(Communicator communicator, ObjectMapper mapper) {
+        this.communicator = communicator;
+        this.mapper = mapper;
+    }
 
     @Override
-    public byte[] handle(Map<String, Object> params) {
+    public byte[] generate(Map<String, Object> params) {
         List<Account> accounts = communicator.getAccounts(getIds(params));
         try (Workbook workbook = getWorkbook(accounts);
              ByteArrayOutputStream os = new ByteArrayOutputStream()) {
@@ -39,13 +42,9 @@ public class BalanceReportHandler implements IReportHandler {
         }
     }
 
-    private List<UUID> getIds(Map<String, Object> params) {
-        validateParams(params);
-        return mapper.convertValue(
-                params.get(ACCOUNT_KEY), mapper.getTypeFactory().constructCollectionType(List.class, UUID.class));
-    }
-
-    private void validateParams(Map<String, Object> params) {
+    @Override
+    public void validate(Map<String, Object> params) {
+        List<ValidationError> errors = new ArrayList<>();
         if (params == null || params.isEmpty()) {
             throw new ValidationException("Empty params");
         }
@@ -53,12 +52,34 @@ public class BalanceReportHandler implements IReportHandler {
             if (params.size() > 1) {
                 throw new ValidationException("Wrong parameters for that type of report");
             }
+            if (params.get(ACCOUNT_KEY) == null) {
+                throw new ValidationException("List of account is empty");
+            }
         }
+        List<UUID> accounts = getIds(params);
+        for (UUID id: accounts) {
+            if (communicator.getAccount(id) == null) {
+                errors.add(new ValidationError(id.toString(), "Account doesn't exist"));
+            }
+        }
+        if (!errors.isEmpty()) {
+            throw new ValidationException("Some parameters are invalid", errors);
+        }
+    }
+
+    @Override
+    public String convertDescription(Map<String, Object> params) {
+        return "Выписка по счетам";
+    }
+
+    private List<UUID> getIds(Map<String, Object> params) {
+        return mapper.convertValue(
+                params.get(ACCOUNT_KEY), mapper.getTypeFactory().constructCollectionType(List.class, UUID.class));
     }
 
     private Workbook getWorkbook(List<Account> accounts) {
         Workbook workbook = new XSSFWorkbook();
-        Sheet sheet = workbook.createSheet("Balance");
+        Sheet sheet = workbook.createSheet("Баланс");
         sheet.setColumnWidth(0, 10000);
         sheet.setColumnWidth(1, 10000);
         sheet.setColumnWidth(2, 4000);
@@ -93,15 +114,15 @@ public class BalanceReportHandler implements IReportHandler {
         Row header = sheet.createRow(0);
 
         Cell headerCell = header.createCell(0);
-        headerCell.setCellValue("Account Id");
+        headerCell.setCellValue("Аккаунт");
         headerCell.setCellStyle(headerStyle);
 
         headerCell = header.createCell(1);
-        headerCell.setCellValue("Currency");
+        headerCell.setCellValue("Валюта");
         headerCell.setCellStyle(headerStyle);
 
         headerCell = header.createCell(2);
-        headerCell.setCellValue("Balance");
+        headerCell.setCellValue("Сумма");
         headerCell.setCellStyle(headerStyle);
     }
 
