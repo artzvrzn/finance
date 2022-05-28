@@ -19,14 +19,8 @@ public class ExportController {
     private IReportService reportService;
 
     @GetMapping(value = {"", "/"}, produces = MediaType.TEXT_PLAIN_VALUE)
-    public ResponseEntity<ByteArrayResource> produceReport(@PathVariable("uuid") UUID id) {
-        byte[] reportBytes = reportService.export(id);
-        return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION,
-                        "attachment; filename=" + id + ".xlsx")
-                .contentType(MediaType
-                        .parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
-                .body(new ByteArrayResource(reportBytes));
+    public ResponseEntity<ByteArrayResource> exportReport(@PathVariable("uuid") UUID id) {
+        return reportService.export(id);
     }
 
     @RequestMapping(value = {"", "/"}, method = RequestMethod.HEAD)

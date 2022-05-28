@@ -21,7 +21,7 @@ public class ReportEntity {
     private String description;
     @OneToOne(mappedBy = "report", cascade = CascadeType.ALL)
     @PrimaryKeyJoinColumn
-    private FilenameEntity filename;
+    private FilePropertyEntity filename;
     private Map<String, Object> params;
 
     public UUID getId() {
@@ -72,11 +72,11 @@ public class ReportEntity {
         this.description = description;
     }
 
-    public FilenameEntity getFilename() {
+    public FilePropertyEntity getFilename() {
         return filename;
     }
 
-    public void setFilename(FilenameEntity filename) {
+    public void setFilename(FilePropertyEntity filename) {
         this.filename = filename;
     }
 

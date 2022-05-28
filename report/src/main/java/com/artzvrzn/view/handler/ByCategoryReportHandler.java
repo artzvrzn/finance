@@ -1,19 +1,18 @@
 package com.artzvrzn.view.handler;
 
-import com.artzvrzn.exception.ValidationException;
 import com.artzvrzn.model.Account;
 import com.artzvrzn.model.Operation;
 import com.artzvrzn.view.handler.api.IReportHandler;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.core.convert.ConversionService;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 //@Component
@@ -23,18 +22,23 @@ public class ByCategoryReportHandler implements IReportHandler {
     private final Map<UUID, String> readCurrencies = new HashMap<>();
     private final Map<UUID, String> readCategories = new HashMap<>();
     private final Communicator communicator;
-    private final ObjectMapper mapper;
+    private final ParamsParser paramsParser;
+    private final ConversionService conversionService;
 
-    public ByCategoryReportHandler(Communicator communicator, ObjectMapper mapper) {
+    public ByCategoryReportHandler(Communicator communicator, ParamsParser paramsParser, ConversionService conversionService) {
         this.communicator = communicator;
-        this.mapper = mapper;
+        this.paramsParser = paramsParser;
+        this.conversionService = conversionService;
     }
 
     @Override
     public byte[] generate(Map<String, Object> params) {
-        validateParams(params);
-        List<Account> accounts = communicator.getAccounts(getAccountIds(params));
-        try (Workbook workbook = getWorkbook(accounts, getFrom(params), getTo(params), getCategoryIds(params));
+        List<Account> accounts = communicator.getAccounts(paramsParser.getAccountIds(params));
+        try (Workbook workbook = getWorkbook(
+                accounts,
+                paramsParser.getFrom(params),
+                paramsParser.getTo(params),
+                paramsParser.getCategoryIds(params));
              ByteArrayOutputStream os = new ByteArrayOutputStream()) {
             workbook.write(os);
             return os.toByteArray();
@@ -44,47 +48,13 @@ public class ByCategoryReportHandler implements IReportHandler {
     }
 
     @Override
-    public void validate(Map<String, Object> params) {
-
+    public String getFileFormat() {
+        return ".xlsx";
     }
 
-    private List<UUID> getIds(Map<String, Object> params, String key) {
-        return mapper.convertValue(
-                params.get(key), mapper.getTypeFactory().constructCollectionType(List.class, UUID.class));
-    }
-
-    private long getLong(Map<String, Object> params, String key) {
-        return mapper.convertValue(params.get(key), Long.class);
-    }
-
-    private long getFrom(Map<String, Object> params) {
-        return getLong(params, "from");
-    }
-
-    private List<UUID> getAccountIds(Map<String, Object> params) {
-        return getIds(params, "accounts");
-    }
-
-    private List<UUID> getCategoryIds(Map<String, Object> params) {
-        return getIds(params, "categories");
-    }
-
-    private long getTo(Map<String, Object> params) {
-        return getLong(params, "to");
-    }
-
-    private void validateParams(Map<String, Object> params) {
-        if (params == null || params.isEmpty()) {
-            throw new ValidationException("Empty params");
-        }
-        if (params.size() <= 1) {
-            throw new ValidationException("Wrong parameters for that type of report");
-        }
-    }
-
-    private Workbook getWorkbook(List<Account> accounts, long from, long to, Collection<UUID> categories) {
+    private Workbook getWorkbook(List<Account> accounts, LocalDate from, LocalDate to, Collection<UUID> categories) {
         Workbook workbook = new XSSFWorkbook();
-        Sheet sheet = workbook.createSheet("By category");
+        Sheet sheet = workbook.createSheet("По категории");
         sheet.setColumnWidth(0, 4000);
         sheet.setColumnWidth(1, 10000);
         sheet.setColumnWidth(2, 4000);
@@ -94,8 +64,12 @@ public class ByCategoryReportHandler implements IReportHandler {
         createHeader(sheet, headerStyle);
         CellStyle contentStyle = contentStyle(workbook);
         int rowIndex = 1;
+        //TODO
+        long fromLong = conversionService.convert(from, Long.class);
+        long toLong = conversionService.convert(to, Long.class);
         for (Account account: accounts) {
-            List<Operation> operations = communicator.getOperations(account.getId(), from, to, categories)
+            List<Operation> operations = communicator
+                    .getOperations(account.getId(), fromLong, toLong, categories)
                     .stream()
                     .sorted(Comparator.comparing(Operation::getCategory))
                     .collect(Collectors.toList());
@@ -152,7 +126,7 @@ public class ByCategoryReportHandler implements IReportHandler {
         Cell cell = row.createCell(0);
         String category = readCategories.get(operation.getCategory());
         if (category == null) {
-            category = communicator.readCategory(operation.getCategory()).getTitle();
+            category = communicator.getCategory(operation.getCategory()).getTitle();
             readCategories.put(operation.getCategory(), category);
         }
         cell.setCellValue(category);
@@ -169,7 +143,7 @@ public class ByCategoryReportHandler implements IReportHandler {
         cell = row.createCell(3);
         String currency = readCurrencies.get(operation.getCurrency());
         if (currency == null) {
-            currency = communicator.readCurrency(operation.getCurrency()).getTitle();
+            currency = communicator.getCurrency(operation.getCurrency()).getTitle();
             readCurrencies.put(operation.getCurrency(), currency);
         }
         cell.setCellValue(currency);

@@ -7,8 +7,5 @@ public interface IReportHandler {
 
     byte[] generate(Map<String, Object> params);
 
-    void validate(Map<String, Object> params);
-
-    String convertDescription(Map<String, Object> params);
-
+    String getFileFormat();
 }

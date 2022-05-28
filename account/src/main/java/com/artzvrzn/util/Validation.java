@@ -2,13 +2,10 @@ package com.artzvrzn.util;
 
 import com.artzvrzn.exception.ValidationException;
 import com.artzvrzn.model.Account;
-import com.artzvrzn.model.AccountType;
 import com.artzvrzn.model.Operation;
-import com.artzvrzn.model.validation.ValidationError;
+import com.artzvrzn.model.errors.ValidationError;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 public final class Validation {

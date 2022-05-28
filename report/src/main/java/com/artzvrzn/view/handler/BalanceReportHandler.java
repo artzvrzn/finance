@@ -1,21 +1,15 @@
 package com.artzvrzn.view.handler;
 
-import com.artzvrzn.exception.ValidationException;
 import com.artzvrzn.model.Account;
-import com.artzvrzn.model.validation.ValidationError;
 import com.artzvrzn.view.handler.api.IReportHandler;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 
 //@Component
 //@Scope(proxyMode = ScopedProxyMode.TARGET_CLASS)
@@ -23,16 +17,16 @@ public class BalanceReportHandler implements IReportHandler {
 
     private static final String ACCOUNT_KEY = "accounts";
     private final Communicator communicator;
-    private final ObjectMapper mapper;
+    private final ParamsParser paramsParser;
 
-    public BalanceReportHandler(Communicator communicator, ObjectMapper mapper) {
+    public BalanceReportHandler(Communicator communicator, ParamsParser paramsParser) {
         this.communicator = communicator;
-        this.mapper = mapper;
+        this.paramsParser = paramsParser;
     }
 
     @Override
     public byte[] generate(Map<String, Object> params) {
-        List<Account> accounts = communicator.getAccounts(getIds(params));
+        List<Account> accounts = communicator.getAccounts(paramsParser.getAccountIds(params));
         try (Workbook workbook = getWorkbook(accounts);
              ByteArrayOutputStream os = new ByteArrayOutputStream()) {
             workbook.write(os);
@@ -43,38 +37,8 @@ public class BalanceReportHandler implements IReportHandler {
     }
 
     @Override
-    public void validate(Map<String, Object> params) {
-        List<ValidationError> errors = new ArrayList<>();
-        if (params == null || params.isEmpty()) {
-            throw new ValidationException("Empty params");
-        }
-        if (params.containsKey(ACCOUNT_KEY)) {
-            if (params.size() > 1) {
-                throw new ValidationException("Wrong parameters for that type of report");
-            }
-            if (params.get(ACCOUNT_KEY) == null) {
-                throw new ValidationException("List of account is empty");
-            }
-        }
-        List<UUID> accounts = getIds(params);
-        for (UUID id: accounts) {
-            if (communicator.getAccount(id) == null) {
-                errors.add(new ValidationError(id.toString(), "Account doesn't exist"));
-            }
-        }
-        if (!errors.isEmpty()) {
-            throw new ValidationException("Some parameters are invalid", errors);
-        }
-    }
-
-    @Override
-    public String convertDescription(Map<String, Object> params) {
-        return "Выписка по счетам";
-    }
-
-    private List<UUID> getIds(Map<String, Object> params) {
-        return mapper.convertValue(
-                params.get(ACCOUNT_KEY), mapper.getTypeFactory().constructCollectionType(List.class, UUID.class));
+    public String getFileFormat() {
+        return ".xlsx";
     }
 
     private Workbook getWorkbook(List<Account> accounts) {
@@ -133,7 +97,7 @@ public class BalanceReportHandler implements IReportHandler {
         cell.setCellStyle(contentStyle);
 
         cell = row.createCell(1);
-        cell.setCellValue(communicator.readCurrency(account.getCurrency()).getTitle());
+        cell.setCellValue(communicator.getCurrency(account.getCurrency()).getTitle());
         cell.setCellStyle(contentStyle);
 
         cell = row.createCell(2);

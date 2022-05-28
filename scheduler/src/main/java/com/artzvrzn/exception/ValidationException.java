@@ -7,7 +7,7 @@ import java.util.List;
 
 public class ValidationException extends IllegalArgumentException {
 
-    private List<ValidationError> errors;
+    private final List<ValidationError> errors;
 
     public ValidationException(String message) {
         super(message);

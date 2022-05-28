@@ -1,4 +1,4 @@
-package com.artzvrzn.model.validation;
+package com.artzvrzn.model.errors;
 
 public class ValidationError {
 

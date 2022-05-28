@@ -1,6 +1,6 @@
 package com.artzvrzn.dao.api;
 
-import com.artzvrzn.dao.api.entity.FilenameEntity;
+import com.artzvrzn.dao.api.entity.FilePropertyEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -11,13 +11,13 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.UUID;
 
 @Repository
-public interface FilenameRepository extends JpaRepository<FilenameEntity, UUID> {
+public interface FilenameRepository extends JpaRepository<FilePropertyEntity, UUID> {
 
     @Transactional
     @Modifying
-    @Query(value = "update app.reports_path set path = :filename where report_id = :id", nativeQuery = true)
-    void updateFilename(@Param("id") UUID id, @Param("filename") String filename);
+    @Query(value = "update app.file_properties set path = :path, extension = :ext where report_id = :id", nativeQuery = true)
+    void updateFilename(@Param("id") UUID id, @Param("path") String path, @Param("ext") String extension);
 
-    @Query(value = "select * from app.reports_path where report_id = :id", nativeQuery = true)
-    FilenameEntity getByReportId(@Param("id") UUID id);
+    @Query(value = "select * from app.file_properties where report_id = :id", nativeQuery = true)
+    FilePropertyEntity getByReportId(@Param("id") UUID id);
 }

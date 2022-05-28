@@ -1,8 +1,8 @@
 package com.artzvrzn.controller.advice;
 
 import com.artzvrzn.exception.ValidationException;
-import com.artzvrzn.model.validation.MultipleResponseError;
-import com.artzvrzn.model.validation.SingleResponseError;
+import com.artzvrzn.model.errors.MultipleResponseError;
+import com.artzvrzn.model.errors.SingleResponseError;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

@@ -4,9 +4,6 @@ import com.artzvrzn.model.*;
 import com.artzvrzn.model.Currency;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
@@ -27,7 +24,10 @@ public class Communicator {
     public List<Account> getAccounts(List<UUID> ids) {
         List<Account> accounts = new ArrayList<>();
         for (UUID id: ids) {
-            accounts.add(getAccount(id));
+            Account account = getAccount(id);
+            if (account != null) {
+                accounts.add(account);
+            }
         }
         return accounts;
     }
@@ -64,12 +64,12 @@ public class Communicator {
         return getRequest(accountUrl, Account.class);
     }
 
-    public Currency readCurrency(UUID currencyId) {
+    public Currency getCurrency(UUID currencyId) {
         String currencyUrl = CLASSIFIER_SERVICE_URL + "/currency/" + currencyId;
         return getRequest(currencyUrl, Currency.class);
     }
 
-    public Category readCategory(UUID categoryId) {
+    public Category getCategory(UUID categoryId) {
         String categoryUrl = CLASSIFIER_SERVICE_URL + "/operation/category/" + categoryId;
         return getRequest(categoryUrl, Category.class);
     }

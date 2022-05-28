@@ -1,13 +1,13 @@
 package com.artzvrzn.exception;
 
-import com.artzvrzn.model.validation.ValidationError;
+import com.artzvrzn.model.errors.ValidationError;
 
 import java.util.Collections;
 import java.util.List;
 
 public class ValidationException extends IllegalArgumentException {
 
-    private List<ValidationError> errors;
+    private final List<ValidationError> errors;
 
     public ValidationException(String message) {
         super(message);

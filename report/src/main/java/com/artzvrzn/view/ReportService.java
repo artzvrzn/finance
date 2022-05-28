@@ -2,24 +2,27 @@ package com.artzvrzn.view;
 
 import com.artzvrzn.dao.api.FilenameRepository;
 import com.artzvrzn.dao.api.IReportRepository;
-import com.artzvrzn.dao.api.entity.FilenameEntity;
+import com.artzvrzn.dao.api.entity.FilePropertyEntity;
 import com.artzvrzn.dao.api.entity.ReportEntity;
 import com.artzvrzn.exception.ValidationException;
 import com.artzvrzn.model.Report;
+import com.artzvrzn.model.ReportFile;
 import com.artzvrzn.model.ReportType;
 import com.artzvrzn.model.Status;
 import com.artzvrzn.view.api.IReportExecutor;
 import com.artzvrzn.view.api.IReportService;
+import org.apache.commons.compress.utils.FileNameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.ConversionService;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.UUID;
@@ -65,17 +68,12 @@ public class ReportService implements IReportService {
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public byte[] export(UUID id) {
-        FilenameEntity filenameEntity = filenameRepository.getByReportId(id);
-        if (filenameEntity == null) {
-            throw new ValidationException(String.format("Report with id %s doesn't exist", id));
-        }
-        Path filename = Path.of(filenameEntity.getPath());
-        try {
-            return Files.readAllBytes(filename);
-        } catch (IOException e) {
-            throw new IllegalStateException("Cannot read file", e);
-        }
+    public ResponseEntity<ByteArrayResource> export(UUID id) {
+        ReportFile reportFile = executor.readFile(id);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=" + id + "." + reportFile.getExtension())
+                .contentType(reportFile.getMediaType())
+                .body(new ByteArrayResource(reportFile.getContent()));
     }
 }
