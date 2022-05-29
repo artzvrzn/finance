@@ -17,6 +17,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.UUID;
@@ -64,17 +65,10 @@ public class OperationService implements IOperationService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<Operation> get(UUID accountId, long from, long to, Collection<UUID> categories, Pageable pageable) {
+    public Page<Operation> get(
+            UUID accountId, long from, long to, Collection<UUID> categories, Pageable pageable) {
         return operationRepository
                 .findAllByAccount_IdAndDateBetweenAndCategoryIn(accountId, from, to, categories, pageable)
-                .map(e -> conversionService.convert(e, Operation.class));
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public Page<Operation> get(UUID accountId, UUID categoryId, Pageable pageable) {
-        return operationRepository
-                .findAllByAccount_IdAndCategory(accountId, categoryId, pageable)
                 .map(e -> conversionService.convert(e, Operation.class));
     }
 

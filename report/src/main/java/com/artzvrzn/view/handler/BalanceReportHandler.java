@@ -25,12 +25,12 @@ public class BalanceReportHandler implements IReportHandler {
     }
 
     @Override
-    public byte[] generate(Map<String, Object> params) {
+    public ByteArrayOutputStream generate(Map<String, Object> params) {
         List<Account> accounts = communicator.getAccounts(paramsParser.getAccountIds(params));
         try (Workbook workbook = getWorkbook(accounts);
              ByteArrayOutputStream os = new ByteArrayOutputStream()) {
             workbook.write(os);
-            return os.toByteArray();
+            return os;
         } catch (IOException e) {
             throw new IllegalStateException("Failed to create report", e);
         }

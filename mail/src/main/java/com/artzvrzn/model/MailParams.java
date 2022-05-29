@@ -1,0 +1,39 @@
+package com.artzvrzn.model;
+
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
+
+import java.util.Map;
+
+@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
+public class MailParams {
+
+    private String receiverEmail;
+    private String type;
+    private Map<String, Object> params;
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public String getReceiverEmail() {
+        return receiverEmail;
+    }
+
+    public void setReceiverEmail(String receiverEmail) {
+        this.receiverEmail = receiverEmail;
+    }
+
+    public Map<String, Object> getParams() {
+        return params;
+    }
+
+    public void setParams(Map<String, Object> params) {
+        this.params = params;
+    }
+
+}

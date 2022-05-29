@@ -1,12 +1,17 @@
 package com.artzvrzn.model;
 
 import com.artzvrzn.util.serializer.DecimalSerializer;
+import com.artzvrzn.util.serializer.EpochLocalDateDeserializer;
+import com.artzvrzn.util.serializer.EpochLocalDateSerializer;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import java.util.UUID;
 
 public class Operation extends BaseDTO {
 
+    @JsonSerialize(using = EpochLocalDateSerializer.class)
+    @JsonDeserialize(using = EpochLocalDateDeserializer.class)
     private long date;
     private String description;
     private UUID category;

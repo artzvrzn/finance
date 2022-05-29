@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.repository.query.Param;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,11 +21,13 @@ public class ReportController {
     private IReportService reportService;
 
     @PostMapping(value = {"/{type}", "/{type}/"}, consumes = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseStatus(HttpStatus.CREATED)
     public void createReport(@PathVariable("type") ReportType type, @RequestBody Map<String, Object> reportParams) {
         reportService.create(type, reportParams);
     }
 
     @GetMapping(value = {"", "/"}, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseStatus(HttpStatus.OK)
     public Page<Report> getReports(@Param("page") int page, @Param("size") int size) {
         PageRequest request = PageRequest.of(page, size);
         return reportService.get(request);

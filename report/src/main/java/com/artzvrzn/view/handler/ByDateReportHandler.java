@@ -36,7 +36,7 @@ public class ByDateReportHandler implements IReportHandler {
     }
 
     @Override
-    public byte[] generate(Map<String, Object> params) {
+    public ByteArrayOutputStream generate(Map<String, Object> params) {
         List<Account> accounts = communicator.getAccounts(paramsParser.getAccountIds(params));
         try (Workbook workbook = getWorkbook(
                 accounts,
@@ -45,7 +45,7 @@ public class ByDateReportHandler implements IReportHandler {
                 paramsParser.getCategoryIds(params));
              ByteArrayOutputStream os = new ByteArrayOutputStream()) {
             workbook.write(os);
-            return os.toByteArray();
+            return os;
         } catch (IOException e) {
             throw new IllegalStateException("Failed to create report", e);
         }

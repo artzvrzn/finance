@@ -22,7 +22,7 @@ public final class Validation {
         nullCheck("type", account.getType(), errors);
         nullCheck("currency", account.getCurrency(), errors);
         if (!errors.isEmpty()) {
-            throw new ValidationException("Validation error", errors);
+            throw new ValidationException(errors);
         }
     }
 
@@ -37,7 +37,7 @@ public final class Validation {
         nullCheck("date", operation.getDate(), errors);
         nullCheck("value", operation.getValue(), errors);
         if (!errors.isEmpty()) {
-            throw new ValidationException("Validation error", errors);
+            throw new ValidationException(errors);
         }
     }
 

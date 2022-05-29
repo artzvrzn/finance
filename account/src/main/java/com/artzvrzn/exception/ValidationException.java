@@ -14,8 +14,8 @@ public class ValidationException extends IllegalArgumentException {
         errors = Collections.emptyList();
     }
 
-    public ValidationException(String message, List<ValidationError> errors) {
-        super(message);
+    public ValidationException(List<ValidationError> errors) {
+        super("structured_error");
         this.errors = errors;
     }
 

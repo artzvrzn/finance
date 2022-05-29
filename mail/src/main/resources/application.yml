@@ -1,0 +1,22 @@
+server:
+  port: 8084
+urls:
+  report-service: http://localhost:8083/
+spring:
+  mail:
+    host: smtp.mail.ru
+    port: 465
+    username: secret
+    password: secret
+    properties:
+      mail:
+        from: secret
+        transport.protocol: smtp
+        smtp:
+          auth: true
+          starttls.enable: true
+          ssl:
+            protocols: TLSv1.2
+            enable: true
+            trust: smtp.mail.ru
+

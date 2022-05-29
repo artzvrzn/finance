@@ -1,0 +1,28 @@
+server:
+  port: 8084
+urls:
+  report-service: http://localhost:8083/
+logging:
+  level:
+    org:
+      apache:
+        http: DEBUG
+spring:
+  mail:
+    host: smtp.mail.ru
+    port: 465
+    username: finance-mail-service@mail.ru
+    password: cDZBJnNefc3FVm3x4j8R
+    properties:
+      mail:
+#        debug: true
+        from: finance-mail-service@mail.ru
+        transport.protocol: smtp
+        smtp:
+          auth: true
+          starttls.enable: true
+          ssl:
+            protocols: TLSv1.2
+            enable: true
+            trust: smtp.mail.ru
+

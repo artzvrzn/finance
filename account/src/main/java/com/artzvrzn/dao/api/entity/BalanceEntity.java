@@ -10,7 +10,6 @@ public class BalanceEntity {
     @Id
     @Column(name = "account_id", updatable = false)
     private UUID id;
-
     @OneToOne
     @MapsId
     @JoinColumn(name = "account_id")

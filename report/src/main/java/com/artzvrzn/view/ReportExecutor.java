@@ -51,9 +51,8 @@ public class ReportExecutor implements IReportExecutor {
         executorService.execute(() -> {
             reportRepository.updateStatus(id, Status.PROGRESS, LocalDateTime.now());
             try {
-//                Thread.sleep(10000l);
-                byte[] bytes = handler.generate(entity.getParams());
-                saveFile(id, bytes, handler.getFileFormat());
+                saveFile(id, handler.generate(entity.getParams()), handler.getFileFormat());
+                reportRepository.updateStatus(id, Status.DONE, LocalDateTime.now());
             } catch (Exception exc) {
                 reportRepository.updateStatus(id, Status.ERROR, LocalDateTime.now());
             }
@@ -65,7 +64,8 @@ public class ReportExecutor implements IReportExecutor {
     public ReportFile readFile(UUID id) {
         FilePropertyEntity fileProperty = filenameRepository.getByReportId(id);
         if (fileProperty == null) {
-            throw new ValidationException(String.format("Report with id %s doesn't exist", id));
+            return null;
+//            throw new ValidationException(String.format("Report with id %s doesn't exist", id));
         }
         Path path = Path.of(fileProperty.getPath());
         String extension = FileNameUtils.getExtension(fileProperty.getExtension());
@@ -80,11 +80,11 @@ public class ReportExecutor implements IReportExecutor {
         }
     }
 
-    private void saveFile(UUID id, byte[] bytes, String extension) {
+    private void saveFile(UUID id, ByteArrayOutputStream bytes, String extension) {
         Path path = Path.of(storagePath, id.toString() + extension);
         try {
-            Files.write(path, bytes);
-            reportRepository.updateStatus(id, Status.DONE, LocalDateTime.now());
+            bytes.writeTo(new FileOutputStream(path.toFile()));
+//            Files.write(path, bytes);
             filenameRepository.updateFilename(id, path.toString(), extension);
         } catch (IOException e) {
             reportRepository.updateStatus(id, Status.ERROR, LocalDateTime.now());

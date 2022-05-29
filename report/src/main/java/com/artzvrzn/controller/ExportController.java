@@ -1,5 +1,6 @@
 package com.artzvrzn.controller;
 
+import com.artzvrzn.model.ReportFile;
 import com.artzvrzn.view.api.IReportService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
@@ -20,7 +21,15 @@ public class ExportController {
 
     @GetMapping(value = {"", "/"}, produces = MediaType.TEXT_PLAIN_VALUE)
     public ResponseEntity<ByteArrayResource> exportReport(@PathVariable("uuid") UUID id) {
-        return reportService.export(id);
+        ReportFile reportFile = reportService.export(id);
+        if (reportFile == null) {
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+        }
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=" + id + "." + reportFile.getExtension())
+                .contentType(reportFile.getMediaType())
+                .body(new ByteArrayResource(reportFile.getContent()));
     }
 
     @RequestMapping(value = {"", "/"}, method = RequestMethod.HEAD)

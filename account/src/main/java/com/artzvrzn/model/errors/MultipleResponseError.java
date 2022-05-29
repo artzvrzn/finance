@@ -7,8 +7,8 @@ public class MultipleResponseError {
     private final String logref;
     private final List<ValidationError> errors;
 
-    public MultipleResponseError(String logref, List<ValidationError> errors) {
-        this.logref = logref;
+    public MultipleResponseError(List<ValidationError> errors) {
+        this.logref = "structured_error";
         this.errors = errors;
     }
 

@@ -18,6 +18,7 @@ import org.springframework.core.io.ByteArrayResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -41,18 +42,12 @@ public class ReportService implements IReportService {
     private ConversionService conversionService;
 
     @Override
-    public void create(ReportType type, Map<String, Object> params) {
-        Report report = new Report();
-        report.setId(UUID.randomUUID());
-        LocalDateTime currentTime = LocalDateTime.now();
-        report.setCreated(currentTime);
-        report.setUpdated(currentTime);
-        report.setStatus(Status.LOADED);
-        report.setParams(params);
-        report.setType(type);
+    public UUID create(ReportType type, Map<String, Object> params) {
+        Report report = createReport(type, params);
         ReportEntity entity = conversionService.convert(report, ReportEntity.class);
         reportRepository.save(entity);
         executor.execute(entity.getId());
+        return report.getId();
     }
 
     @Override
@@ -68,12 +63,19 @@ public class ReportService implements IReportService {
     }
 
     @Override
-    public ResponseEntity<ByteArrayResource> export(UUID id) {
-        ReportFile reportFile = executor.readFile(id);
-        return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION,
-                        "attachment; filename=" + id + "." + reportFile.getExtension())
-                .contentType(reportFile.getMediaType())
-                .body(new ByteArrayResource(reportFile.getContent()));
+    public ReportFile export(UUID id) {
+        return executor.readFile(id);
+    }
+
+    private Report createReport(ReportType type, Map<String, Object> params) {
+        Report report = new Report();
+        report.setId(UUID.randomUUID());
+        LocalDateTime currentTime = LocalDateTime.now();
+        report.setCreated(currentTime);
+        report.setUpdated(currentTime);
+        report.setStatus(Status.LOADED);
+        report.setParams(params);
+        report.setType(type);
+        return report;
     }
 }
