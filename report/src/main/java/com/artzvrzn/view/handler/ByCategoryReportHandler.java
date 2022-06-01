@@ -34,13 +34,14 @@ public class ByCategoryReportHandler implements IReportHandler {
     @Override
     public ByteArrayOutputStream generate(Map<String, Object> params) {
         List<Account> accounts = communicator.getAccounts(paramsParser.getAccountIds(params));
-        try (Workbook workbook = getWorkbook(
-                accounts,
-                paramsParser.getFrom(params),
-                paramsParser.getTo(params),
-                paramsParser.getCategoryIds(params));
-             ByteArrayOutputStream os = new ByteArrayOutputStream()) {
+        try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
+            Workbook workbook = getWorkbook(
+                    accounts,
+                    paramsParser.getFrom(params),
+                    paramsParser.getTo(params),
+                    paramsParser.getCategoryIds(params));
             workbook.write(os);
+            workbook.close();
             return os;
         } catch (IOException e) {
             throw new IllegalStateException("Failed to create report", e);
@@ -71,7 +72,8 @@ public class ByCategoryReportHandler implements IReportHandler {
             List<Operation> operations = communicator
                     .getOperations(account.getId(), fromLong, toLong, categories)
                     .stream()
-                    .sorted(Comparator.comparing(Operation::getCategory))
+                    .sorted(Comparator.comparing(Operation::getCategory)
+                            .thenComparing(Operation::getDate))
                     .collect(Collectors.toList());
             for (Operation operation: operations) {
                 createRow(account, operation, rowIndex++, sheet, contentStyle);

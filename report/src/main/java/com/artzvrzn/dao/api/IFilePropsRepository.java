@@ -11,7 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.UUID;
 
 @Repository
-public interface FilenameRepository extends JpaRepository<FilePropertyEntity, UUID> {
+public interface IFilePropsRepository extends JpaRepository<FilePropertyEntity, UUID> {
 
     @Transactional
     @Modifying

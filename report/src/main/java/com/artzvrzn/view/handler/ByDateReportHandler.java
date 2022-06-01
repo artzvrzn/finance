@@ -38,13 +38,14 @@ public class ByDateReportHandler implements IReportHandler {
     @Override
     public ByteArrayOutputStream generate(Map<String, Object> params) {
         List<Account> accounts = communicator.getAccounts(paramsParser.getAccountIds(params));
-        try (Workbook workbook = getWorkbook(
-                accounts,
-                paramsParser.getFrom(params),
-                paramsParser.getTo(params),
-                paramsParser.getCategoryIds(params));
-             ByteArrayOutputStream os = new ByteArrayOutputStream()) {
+        try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
+            Workbook workbook = getWorkbook(
+                    accounts,
+                    paramsParser.getFrom(params),
+                    paramsParser.getTo(params),
+                    paramsParser.getCategoryIds(params));
             workbook.write(os);
+            workbook.close();
             return os;
         } catch (IOException e) {
             throw new IllegalStateException("Failed to create report", e);

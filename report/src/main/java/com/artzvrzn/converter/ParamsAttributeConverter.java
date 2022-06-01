@@ -24,7 +24,7 @@ public class ParamsAttributeConverter implements AttributeConverter<Map<String, 
         try {
             return mapper.writeValueAsString(params);
         } catch (JsonProcessingException e) {
-            throw new IllegalArgumentException("Cannot parse params to String", e);
+            throw new IllegalArgumentException("Failed to convert params to entity", e);
         }
     }
 
@@ -33,7 +33,7 @@ public class ParamsAttributeConverter implements AttributeConverter<Map<String, 
         try {
             return mapper.readValue(params, new TypeReference<HashMap<String,Object>>() {});
         } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+            throw new IllegalArgumentException("Failed to convert params from entity to dto", e);
         }
     }
 }

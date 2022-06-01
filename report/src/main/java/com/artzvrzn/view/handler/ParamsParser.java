@@ -6,6 +6,7 @@ import com.artzvrzn.model.Category;
 import com.artzvrzn.model.ReportType;
 import com.artzvrzn.model.errors.ValidationError;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -46,8 +47,12 @@ public class ParamsParser {
     }
 
     public List<UUID> getIds(Map<String, Object> params, String key) {
-        return mapper.convertValue(
-                params.get(key), mapper.getTypeFactory().constructCollectionType(List.class, UUID.class));
+        try {
+            return mapper.convertValue(
+                    params.get(key), mapper.getTypeFactory().constructCollectionType(List.class, UUID.class));
+        } catch (IllegalArgumentException exc) {
+            throw new ValidationException(key + " has wrong type");
+        }
     }
 
     public void validate(ReportType type, Map<String, Object> params) {

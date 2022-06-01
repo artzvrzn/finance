@@ -1,26 +1,18 @@
 package com.artzvrzn.view;
 
-import com.artzvrzn.dao.api.FilenameRepository;
+import com.artzvrzn.dao.api.IFilePropsRepository;
 import com.artzvrzn.dao.api.IReportRepository;
-import com.artzvrzn.dao.api.entity.FilePropertyEntity;
 import com.artzvrzn.dao.api.entity.ReportEntity;
-import com.artzvrzn.exception.ValidationException;
 import com.artzvrzn.model.Report;
 import com.artzvrzn.model.ReportFile;
 import com.artzvrzn.model.ReportType;
 import com.artzvrzn.model.Status;
 import com.artzvrzn.view.api.IReportExecutor;
 import com.artzvrzn.view.api.IReportService;
-import org.apache.commons.compress.utils.FileNameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.ConversionService;
-import org.springframework.core.io.ByteArrayResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,7 +29,7 @@ public class ReportService implements IReportService {
     @Autowired
     private IReportRepository reportRepository;
     @Autowired
-    private FilenameRepository filenameRepository;
+    private IFilePropsRepository filenameRepository;
     @Autowired
     private ConversionService conversionService;
 

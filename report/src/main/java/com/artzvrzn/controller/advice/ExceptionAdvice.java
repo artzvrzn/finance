@@ -4,6 +4,7 @@ import com.artzvrzn.exception.ValidationException;
 import com.artzvrzn.model.errors.MultipleResponseError;
 import com.artzvrzn.model.errors.SingleResponseError;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
+import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -23,9 +24,10 @@ public class ExceptionAdvice {
         }
     }
 
-    @ExceptionHandler({InvalidFormatException.class, DateTimeParseException.class})
+    @ExceptionHandler({InvalidFormatException.class, MismatchedInputException.class, DateTimeParseException.class})
     public ResponseEntity<?> invalidFormatHandler(InvalidFormatException exception) {
-        return new ResponseEntity<>(new SingleResponseError("Some fields have wrong format"),
+
+        return new ResponseEntity<>(new SingleResponseError(exception.getTargetType().getSimpleName()),
                 HttpStatus.BAD_REQUEST);
     }
 }

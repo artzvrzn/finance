@@ -1,10 +1,9 @@
 package com.artzvrzn.view;
 
-import com.artzvrzn.dao.api.FilenameRepository;
+import com.artzvrzn.dao.api.IFilePropsRepository;
 import com.artzvrzn.dao.api.IReportRepository;
 import com.artzvrzn.dao.api.entity.FilePropertyEntity;
 import com.artzvrzn.dao.api.entity.ReportEntity;
-import com.artzvrzn.exception.ValidationException;
 import com.artzvrzn.model.ReportFile;
 import com.artzvrzn.model.Status;
 import com.artzvrzn.view.api.IReportExecutor;
@@ -12,7 +11,6 @@ import com.artzvrzn.view.handler.ParamsParser;
 import com.artzvrzn.view.handler.ReportHandlerFactory;
 import com.artzvrzn.view.handler.api.IReportHandler;
 import org.apache.commons.compress.utils.FileNameUtils;
-import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
@@ -35,7 +33,7 @@ public class ReportExecutor implements IReportExecutor {
     @Autowired
     private IReportRepository reportRepository;
     @Autowired
-    private FilenameRepository filenameRepository;
+    private IFilePropsRepository filenameRepository;
     @Autowired
     private ExecutorService executorService;
     @Autowired
@@ -82,8 +80,8 @@ public class ReportExecutor implements IReportExecutor {
 
     private void saveFile(UUID id, ByteArrayOutputStream bytes, String extension) {
         Path path = Path.of(storagePath, id.toString() + extension);
-        try {
-            bytes.writeTo(new FileOutputStream(path.toFile()));
+        try (bytes; FileOutputStream fos = new FileOutputStream(path.toFile())) {
+            bytes.writeTo(fos);
 //            Files.write(path, bytes);
             filenameRepository.updateFilename(id, path.toString(), extension);
         } catch (IOException e) {
