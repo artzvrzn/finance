@@ -1,0 +1,28 @@
+server:
+  port: 8085
+urls:
+  mail-service: http://localhost:8084/mail
+spring:
+  jpa:
+    database: POSTGRESQL
+    show-sql: true
+    hibernate:
+      ddl-auto: create
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    jdbc-url: jdbc:postgresql://localhost:5432/mail_scheduler
+    username: postgres
+    password: 111
+  mvc:
+    view:
+      prefix: /views/
+      suffix: .jsp
+  quartz:
+    job-store-type: jdbc
+    overwrite-existing-jobs: true
+    jdbc:
+      initialize-schema: never
+      platform: postgres
+    properties:
+      org.quartz.jobStore.driverDelegateClass: "org.quartz.impl.jdbcjobstore.PostgreSQLDelegate"
+      org.quartz.jobStore.tablePrefix: "quartz.QRTZ_"
